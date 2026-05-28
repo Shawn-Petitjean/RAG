@@ -1,0 +1,44 @@
+*qu est ce qu'un RAG?
+
+**Indexing: Before retrieval, the data must be indexed, this step structures and
+organises the information to make it searchable later on
+
+**Retrieving: Since the model is not trained on your specific data, it needs to
+search the database to retrieve the most useful snippets. First, the model needs to
+understand your question. Once that’s done, it matches the query with the indexed
+database to choose the best results and finally pulls out the most relevant pieces of
+information. This involves query encoding, similarity search, and ranking
+
+**Augmenting: Once the AI has retrieved the information, it can combine it with
+what it already “knows.” However, in most practical applications, we try to rely as
+much as possible on the retrieved data rather than the model’s internal knowledge
+— since mixing both may lead to outdated or hallucinatory answers. Starting from
+the retrieved results, you can clean and filter them to remove irrelevant snippets
+(to avoid potential noise), insert them into the context window
+
+**Generating: Now that you have retrieved the information and augmented it,
+the AI can finally generate an answer! Whether it’s writing text, explaining a
+concept, or producing code snippets, this is the visible outcome of RAG. To do
+so, the AI reads the context window, understands the task at hand, blends the
+knowledge, and generates the output. Modern RAG systems often refine while
+writing, adjusting phrasing on the fly to maintain coherence and match the tone
+requested in the query
+
+- comment developper les skill en comprehension de langage,
+raisonnement et analyse de structure sur un model
+
+- 
+
+
+*regle
+1) pydantic pour chaque class
+
+2) librairie recommander transformers, dspy,
+fire, tqdm, langchain, bm25s, chromadb packages.
+
+3) le system doit fournire une interface en ligne de commande utilisant Python Fire
+
+4) des bars de chargement doivent etre implementer pour les operations
+de long duree en utilisant tqdm
+
+*ligne de commande
