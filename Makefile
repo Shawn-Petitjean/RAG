@@ -1,5 +1,5 @@
 SRC = src
-EXE = $(SRC)
+EXE = $(SRC)/__main__.py
 
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
