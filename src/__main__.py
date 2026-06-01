@@ -1,9 +1,6 @@
 import argparse
-<<<<<<< HEAD
-from .ingest import get_files, files_dispatch
-=======
-from .ingest import get_files
->>>>>>> refs/remotes/origin/master
+from ingest import get_files, files_dispatch
+
 
 
 def main():
@@ -15,15 +12,10 @@ def main():
     # parser.add_argument("--output",
     #                     default="data/output/function_calling_results.json")
     # args = parser.parse_args()
-    dir_path = "/home/shapetit/Documents/42/C_4/RAG/vllm-0.10.1"
+    dir_path = "/home/shawn/Documents/42/RAG/packets/vllm-0.10.1"
     f = get_files(dir_path)
-<<<<<<< HEAD
     data_m = files_dispatch(f)
-=======
-    for file in f:
-        print(file)
     print(len(f))
->>>>>>> refs/remotes/origin/master
     # print(list(dir_path.d("*.d")))
     # for dir in dir_path.iterdir():
     #     if not dir.is_file():

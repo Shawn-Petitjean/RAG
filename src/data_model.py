@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 from pydantic import BaseModel, Field
 from typing import List
 
 
-=======
->>>>>>> refs/remotes/origin/master
 class MinimalSource(BaseModel):
     file_path: str
     first_character_index: int
@@ -42,7 +39,6 @@ class StudentSearchResults(BaseModel):
 
 class StudentSearchResultsAndAnswer(StudentSearchResults):
     search_results: List[MinimalAnswer]
-<<<<<<< HEAD
 
 def test(li: str):
     truc = "ca a interet a fonctionner sa mere"
@@ -97,5 +93,3 @@ def test(li: str):
     "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     "ssssssssssssssssssssssssssssssssss")
     return int
-=======
->>>>>>> refs/remotes/origin/master
