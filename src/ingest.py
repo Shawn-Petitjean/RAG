@@ -1,6 +1,6 @@
 from pathlib import Path
-from chunking import py_chunk
-from data_model import MinimalSource
+from .chunking import py_chunk, md_chunk
+from .data_model import MinimalSource
 
 
 def files_dispatch(files: list[str]):
@@ -8,8 +8,7 @@ def files_dispatch(files: list[str]):
     md_files = [file for file in files if file.endswith(".md")]
     py_m_s = [MinimalSource]
     md_m_s = [MinimalSource]
-    m_s = (py_chunk("/home/shawn/Documents/42/RAG/src/data_model.py"))
-    print(m_s)
+    m_s = (md_chunk("/home/shapetit/Documents/42/C_4/RAG/vllm-0.10.1/CODE_OF_CONDUCT.md"))
 
 
 def get_files(dir: str) -> list[str | None]:
