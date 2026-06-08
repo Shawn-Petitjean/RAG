@@ -11,10 +11,6 @@ def files_dispatch(files: list[str]):
     m_s = (md_chunk("/home/shapetit/Documents/42/C_4/RAG/vllm-0.10.1/CODE_OF_CONDUCT.md"))
 
 
-def get_files(dir: str) -> list[str | None]:
-    ...
-
-
 def get_files(dir: str):
     dir_path = Path(dir)
     files = []

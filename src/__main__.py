@@ -1,17 +1,13 @@
 import argparse
 from .ingest import get_files, files_dispatch
-
+from .model_init import init_question
+import fire
+from interface import Cli
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input",
-                        default="data/input_pub/function_calling_tests.json")
-    parser.add_argument("--functions_definition",
-                        default="data/input_pub/functions_definition.json")
-    parser.add_argument("--output",
-                        default="data/output/function_calling_results.json")
-    args = parser.parse_args()
+    fire.Fire(Cli)
+    # init_question()
     # dir_path = "/home/shapetit/Documents/42/C_4/RAG/vllm-0.10.1"
     # f = get_files(dir_path)
     # data_m = files_dispatch(f)
