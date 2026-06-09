@@ -1,1 +1,2 @@
-class RAG()
+class RAG():
+    ...

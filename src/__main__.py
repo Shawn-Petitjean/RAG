@@ -1,8 +1,6 @@
-import argparse
-from .ingest import get_files, files_dispatch
 from .model_init import init_question
 import fire
-from interface import Cli
+from .interface import Cli
 
 
 def main():
