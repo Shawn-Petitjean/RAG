@@ -1,0 +1,2 @@
+[flake8]
+exclude = vllm-0.10.1, .venv, .uv_cache, moulinette

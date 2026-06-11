@@ -1,5 +1,5 @@
 SRC = src
-EXE = $(SRC)/__main__.py
+EXE = $(SRC)
 
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
@@ -50,7 +50,7 @@ install:
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
 
 run:
-	@$(HF_SETUP) uv run python -m $(EXE) $(FLAGS)
+	@$(HF_SETUP) uv run python -m $(EXE) index 1000 $(FLAGS)
 
 lint:
 	@echo "$(BOLD)Verifying project source code:$(RESET)"

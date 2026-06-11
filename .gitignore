@@ -1,0 +1,13 @@
+.venv
+
+.mypy_cache
+
+__pycache__
+.uv_cache
+data/output
+
+moulinette
+
+*.pyc
+*.pyo
+.DS_store

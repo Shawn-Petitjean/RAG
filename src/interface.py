@@ -1,6 +1,7 @@
 from .utils import get_files, save_file
 from .config import VLLM_FILE
 from .index import py_chunking, md_chunking
+from .bm25 import bm_tokeniser
 
 
 class Cli(object):
@@ -19,6 +20,7 @@ class Cli(object):
             elif file.endswith(".md"):
                 md_chunk.extend(md_chunking(file, chunk_size))
         save_file(py_chunk, md_chunk)
+        
 
     def search():
         ...
