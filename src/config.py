@@ -11,3 +11,5 @@ UNANSWER_DOCS = "/home/shapetit/Documents/42/C_4/RAG/data/public/UnansweredQuest
 UNANSWER_CODE = "/home/shapetit/Documents/42/C_4/RAG/data/public/UnansweredQuestions/dataset_code_public.json"
 
 BM_FOLDER = "/home/shapetit/Documents/42/C_4/RAG/data/bm_data/"
+
+OVLAP = 50

@@ -4,7 +4,7 @@ from .utils import extract
 from .config import BM_FOLDER
 
 
-def bm_tokeniser(list_MA):
+def bm_tokeniser(list_MA: list[MinimalAnswer]):
     texts = [extract(c) for c in list_MA]
 
     corpus_tokens = bm25s.tokenize(texts)

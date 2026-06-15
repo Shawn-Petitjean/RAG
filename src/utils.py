@@ -68,3 +68,22 @@ def save_file(py_chunk, md_chunk):
         f.write(json.dumps(serialize(py_chunk), ensure_ascii=False, indent=4))
     with open(OUTPUT_DOCS, 'w') as d:
         d.write(json.dumps(serialize(md_chunk), ensure_ascii=False, indent=4))
+
+
+def get_chunk():
+    with open(OUTPUT_DOCS, 'r') as doc_data:
+        docs = json.load(doc_data)
+    with open(OUTPUT_CODE, 'r') as cod_data:
+        code = json.load(cod_data)
+    docs.extend(code)
+    return docs
+
+
+def save_results(res: list[int]):
+    chunk = get_chunk()
+    print(res)
+    res_chunk = []
+    for i in range(0, len(res)):
+        print(chunk[i])
+        # res_chunk.append(chunk[res])
+    
