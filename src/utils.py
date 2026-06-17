@@ -2,7 +2,7 @@ from .data_model import MinimalSource
 from pathlib import Path
 import json
 from os import path, makedirs
-from .config import OUTPUT_CODE, OUTPUT_DOCS, OUTPUT_FILE
+from .config import OUTPUT_CODE, OUTPUT_DOCS, OUTPUT_FILE, OUTPUT_CHUNK
 
 
 def lst_line(txt: str, i: int) -> int:
@@ -78,12 +78,4 @@ def get_chunk():
     docs.extend(code)
     return docs
 
-
-def save_results(res: list[int]):
-    chunk = get_chunk()
-    print(res)
-    res_chunk = []
-    for i in range(0, len(res)):
-        print(chunk[i])
-        # res_chunk.append(chunk[res])
     

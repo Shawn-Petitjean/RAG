@@ -1,6 +1,7 @@
-from .utils import get_files, save_file, extract, save_results
-from .config import VLLM_FILE, BM_FOLDER
+from .utils import get_files, save_file, extract
+from .config import VLLM_FILE, BM_FOLDER, OUTPUT_CHUNK
 from .index import py_chunking, md_chunking
+from .search import save_search, gather_data_set, process_data_set
 from .bm25 import bm_tokeniser
 import bm25s
 import os
@@ -32,10 +33,17 @@ class Cli(object):
         retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
         query_token = bm25s.tokenize([query])
         results, scores = retriever.retrieve(query_token, k=k)
-        save_results(results[0])
+        res_chunk = save_results(results[0])
+        with open(OUTPUT_CHUNK, 'w') as f:
+            f.write(json.dumps(res_chunk, ensure_ascii=False, indent=4))
 
-    def search_data_set():
-        ...
+    def search_data_set(self, k=5):
+        if not os.path.exists(BM_FOLDER):
+            raise ValueError("Please use the commande index before")
+        retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
+        data_set = gather_data_set()
+        gather_data_set()
+        process_data_set(data_set, retriever, k)
 
     def answer():
         ...

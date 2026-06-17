@@ -1,5 +1,8 @@
 OUTPUT_DOCS = "/home/shapetit/Documents/42/C_4/RAG/data/output/output_docs.json"
 OUTPUT_CODE = "/home/shapetit/Documents/42/C_4/RAG/data/output/output_code.json"
+OUTPUT_CHUNK = "/home/shapetit/Documents/42/C_4/RAG/data/output/output_chunk.json"
+OUTPUT_DOC_SET = "/home/shapetit/Documents/42/C_4/RAG/data/output/output_doc_set.json"
+OUTPUT_CODE_SET = "/home/shapetit/Documents/42/C_4/RAG/data/output/output_code_set.json"
 
 OUTPUT_FILE = "/home/shapetit/Documents/42/C_4/RAG/data/output"
 
