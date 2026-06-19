@@ -1,11 +1,11 @@
 import ast
-from .utils import get_index, extract, lst_line
+from .utils import get_index
 from .data_model import MinimalSource
-from .config import OUTPUT_CODE, OUTPUT_DOCS, OVLAP
+from .config import OVLAP
 
 
-
-def cut(txt: str, first_i: int, last_i: int, file: str, m_char: int):
+def cut(txt: str, first_i: int, last_i: int, file: str,
+        m_char: int) -> list[MinimalSource]:
     list_MS = []
     end_i = first_i
     start_i = first_i
@@ -25,14 +25,16 @@ def cut(txt: str, first_i: int, last_i: int, file: str, m_char: int):
     return list_MS
 
 
-def py_chunking(file: str, m_char: int):
+def py_chunking(file: str, m_char: int) -> list[MinimalSource]:
     l_m_s = []
     with open(file, mode='r') as data:
         txt = data.read()
         tree = ast.parse(txt)
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
-                i_line = get_index(node.lineno, node.end_lineno, file)
+                end_line = (node.end_lineno if node.end_lineno
+                            is not None else node.lineno)
+                i_line = get_index(node.lineno, end_line, file)
                 if i_line[1] - i_line[0] <= m_char:
                     l_m_s.append(MinimalSource(file_path=file,
                                                first_character_index=i_line[0],
@@ -44,7 +46,7 @@ def py_chunking(file: str, m_char: int):
     return l_m_s
 
 
-def md_chunking(file: str, m_char: int):
+def md_chunking(file: str, m_char: int) -> list[MinimalSource]:
     l_m_s = []
     with open(file, mode='r') as data:
         txt = data.read()
@@ -59,8 +61,8 @@ def md_chunking(file: str, m_char: int):
                     i_line = get_index(start, end - 1, file)
                     if i_line[1] - i_line[0] <= m_char:
                         l_m_s.append(MinimalSource(file_path=file,
-                                                   first_character_index=i_line[0],
-                                                   last_character_index=i_line[1]))
+                                     first_character_index=i_line[0],
+                                     last_character_index=i_line[1]))
                         start = end - 2
                     else:
                         new = cut(txt, i_line[0], i_line[1], file, m_char)
@@ -75,11 +77,3 @@ def md_chunking(file: str, m_char: int):
     else:
         l_m_s.extend(cut(txt, i_line[0], i_line[1], file, m_char))
     return l_m_s
-
-
-# def main():
-#     s = py_chunking("/home/shapetit/Documents/42/C_4/RAG/vllm-0.10.1/setup.py", 1000)
-#     print
-
-
-# main()

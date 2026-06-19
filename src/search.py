@@ -1,31 +1,49 @@
-from .config import UNANSWER_DOCS, UNANSWER_CODE, OUTPUT_DOC_SET, OUTPUT_CODE_SET
-from .data_model import UnansweredQuestion, MinimalSearchResults, StudentSearchResults
+from .config import (
+                     UNANSWER_DOCS,
+                     UNANSWER_CODE,
+                     OUTPUT_DOC_SET,
+                     OUTPUT_CODE_SET,
+                     OUTPUT_CHUNK
+                    )
+from .data_model import (
+                         UnansweredQuestion,
+                         MinimalSearchResults,
+                         StudentSearchResults
+                        )
 from .utils import get_chunk
 import json
 import bm25s
+from typing import Any
 
 
-def save_search(res: list[int]):
+def save_search(res: list[int]) -> list[Any]:
     chunk = get_chunk()
     res_chunk = []
     for i in range(0, len(res)):
-        res_chunk.append(chunk[i])
-    return res_chunk
+        res_chunk.append(chunk[res[i]])
+
     with open(OUTPUT_CHUNK, 'w') as f:
         f.write(json.dumps(res_chunk, ensure_ascii=False, indent=4))
 
+    return res_chunk
 
-def gather_data_set():
+
+def gather_data_set() -> tuple[list[UnansweredQuestion],
+                               list[UnansweredQuestion]]:
     with open(UNANSWER_DOCS, 'r') as data:
         docs = json.load(data)
     with open(UNANSWER_CODE, 'r') as data:
         codes = json.load(data)
-    unanswer_code = [UnansweredQuestion.model_validate(code) for code in codes["rag_questions"]]
-    unanswer_doc = [UnansweredQuestion.model_validate(doc) for doc in docs["rag_questions"]]
+    unanswer_code = [UnansweredQuestion.model_validate(code)
+                     for code in codes["rag_questions"]]
+    unanswer_doc = [UnansweredQuestion.model_validate(doc)
+                    for doc in docs["rag_questions"]]
     return unanswer_code, unanswer_doc
 
 
-def process_data_set(data_set: list, retriever, k):
+def process_data_set(data_set: tuple[list[UnansweredQuestion],
+                     list[UnansweredQuestion]],
+                     retriever: Any, k: int) -> None:
     code_search_res = []
     doc_search_res = []
     for code in data_set[0]:
@@ -58,6 +76,3 @@ def process_data_set(data_set: list, retriever, k):
         f.write(code_stud_search_res.model_dump_json(indent=4))
     with open(OUTPUT_DOC_SET, 'w') as f:
         f.write(doc_stud_search_res.model_dump_json(indent=4))
-
-
-

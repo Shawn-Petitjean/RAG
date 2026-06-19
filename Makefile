@@ -50,7 +50,7 @@ install:
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
 
 run:
-	@$(HF_SETUP) uv run python -m $(EXE) search_data_set 5
+	@$(HF_SETUP) uv run python -m $(EXE) search_data_set $(FLAGS)
 
 lint:
 	@echo "$(BOLD)Verifying project source code:$(RESET)"
@@ -60,7 +60,7 @@ lint:
 	@echo "$(GREEN)No norm errors found$(RESET)"
 
 	@echo "\n$(YELLOW)Running mypy...$(RESET)"
-	@$(PYTHON) -m mypy . $(MYPY_FLAGS)
+	@$(PYTHON) -m mypy ./src $(MYPY_FLAGS)
 	@echo "$(GREEN)No typing errors found$(RESET)"
 
 	@echo "\n$(SUCCESS)Success: no errors found in source code!$(RESET)"

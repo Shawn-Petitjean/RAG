@@ -3,8 +3,8 @@
 .mypy_cache
 
 __pycache__
-.uv_cache
-data/output
+
+data/output/function_calling_results.json
 
 moulinette
 

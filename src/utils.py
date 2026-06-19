@@ -2,10 +2,15 @@ from .data_model import MinimalSource
 from pathlib import Path
 import json
 from os import path, makedirs
-from .config import OUTPUT_CODE, OUTPUT_DOCS, OUTPUT_FILE, OUTPUT_CHUNK
+from typing import Any
+from .config import (
+                     OUTPUT_CODE,
+                     OUTPUT_DOCS,
+                     OUTPUT_FILE,
+                    )
 
 
-def lst_line(txt: str, i: int) -> int:
+def lst_line(txt: str, i: int) -> int | None:
     while txt[i] != "\n":
         i -= 1
     while txt[i] == "\n":
@@ -13,9 +18,10 @@ def lst_line(txt: str, i: int) -> int:
     for j in range(i, 0, -1):
         if txt[j] == "\n" and i - j > 10:
             return j + 1
+    return None  # Sécurité si la condition du for n'est jamais respectée
 
 
-def get_index(line1: int, line2: int, path: str):
+def get_index(line1: int, line2: int, path: str) -> list[int]:
     with open(path, mode='r') as data:
         s = data.readlines()
     i_start = 0
@@ -28,7 +34,7 @@ def get_index(line1: int, line2: int, path: str):
         elif c_line < line1:
             i_start += len(line)
         i_end += len(line)
-    return [i_start + 1, i_end -1]
+    return [i_start + 1, i_end - 1]
 
 
 def extract(m_s: MinimalSource) -> str:
@@ -37,9 +43,9 @@ def extract(m_s: MinimalSource) -> str:
         return txt[m_s.first_character_index - 1: m_s.last_character_index - 1]
 
 
-def get_files(dir: str):
+def get_files(dir: str) -> list[str]:
     dir_path = Path(dir)
-    files = []
+    files: list[str] = []
     for f in dir_path.iterdir():
         if not f.is_file():
             d = str(f)
@@ -49,19 +55,20 @@ def get_files(dir: str):
     return files
 
 
-def save_file(py_chunk, md_chunk):
+def save_file(py_chunk: list[Any], md_chunk: list[Any]) -> None:
     if not path.exists(OUTPUT_FILE):
         makedirs(OUTPUT_FILE)
-    
-    def serialize(chunk):
-        result = []
-        for item in chunk:
-            if isinstance(item, list):
-                result.extend(serialize(item))
-            elif hasattr(item, 'model_dump'):
-                result.append(item.model_dump())
-            else:
-                result.append(item)
+
+    def serialize(chunk: list[Any] | Any) -> list[Any]:
+        result: list[Any] = []
+        if isinstance(chunk, list):
+            for item in chunk:
+                if isinstance(item, list):
+                    result.extend(serialize(item))
+                elif hasattr(item, 'model_dump'):
+                    result.append(item.model_dump())
+                else:
+                    result.append(item)
         return result
 
     with open(OUTPUT_CODE, 'w') as f:
@@ -70,12 +77,10 @@ def save_file(py_chunk, md_chunk):
         d.write(json.dumps(serialize(md_chunk), ensure_ascii=False, indent=4))
 
 
-def get_chunk():
+def get_chunk() -> Any:
     with open(OUTPUT_DOCS, 'r') as doc_data:
         docs = json.load(doc_data)
     with open(OUTPUT_CODE, 'r') as cod_data:
         code = json.load(cod_data)
     docs.extend(code)
     return docs
-
-    
