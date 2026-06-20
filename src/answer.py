@@ -68,5 +68,8 @@ def get_answer(tokenizer, model, chunk):
 
 def answer_data_set(tokenizer, model):
     data_set = get_data_set()
+    # recuperer le bon format donc [question, chunk]
+    # recuprer la reponse puis remplir MinimalAnswer
+    # et append dans une list pour chaque question et en faire une class StudentSearchResultsAndAnswer
     for data_model in data_set[0]:
         answer = get_answer(tokenizer, model)
