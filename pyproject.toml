@@ -13,7 +13,9 @@ dependencies = [
     "chromadb",
     "mypy",
     "pydantic",
-    "mypy"
+    "accelerate",
+    "torch",
+    "transformers"
 ]
 
 [build-system]

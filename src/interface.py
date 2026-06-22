@@ -78,9 +78,9 @@ class Cli(object):
         if (not os.path.exists(OUTPUT_DOC_SET) or
            not os.path.exists(OUTPUT_CODE_SET)):
             raise ValueError("Please use the commande search_data_set before")
-        # tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-        # model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-        answer_data_set()
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+        answer_data_set(tokenizer, model)
 
     def evaluate(self) -> None:
         ...

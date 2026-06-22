@@ -50,7 +50,7 @@ install:
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
 
 run:
-	@$(HF_SETUP) uv run python -m $(EXE) search_data_set $(FLAGS)
+	@$(HF_SETUP) uv run python -m $(EXE) answer_data_set $(FLAGS)
 
 lint:
 	@echo "$(BOLD)Verifying project source code:$(RESET)"

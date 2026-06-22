@@ -5,7 +5,12 @@ from .data_model import (
                          MinimalAnswer,
                          StudentSearchResultsAndAnswer
                         )
-from .config import SYSTEM_PROMPT, OUTPUT_CODE_SET, OUTPUT_DOC_SET
+from .config import (
+                     SYSTEM_PROMPT,
+                     OUTPUT_CODE_SET,
+                     OUTPUT_DOC_SET,
+                     OUTPUT_ANSWER_DATA_SET
+                    )
 import json
 
 
@@ -22,13 +27,17 @@ def get_data_set():
 def get_context(chunk):
     blocks = []
     for i in range(1, 6):
-        m_s = MinimalSource(
-            file_path=chunk[i]["file_path"],
-            first_character_index=chunk[i]["first_character_index"],
-            last_character_index=chunk[i]["last_character_index"]
-        )
-        text = extract(m_s)
-        block = f"[Source {i}: {chunk[i]["file_path"]}]\n{text}"
+        if not isinstance(chunk[i], MinimalSource):
+            m_s = MinimalSource(
+                file_path=chunk[i]["file_path"],
+                first_character_index=chunk[i]["first_character_index"],
+                last_character_index=chunk[i]["last_character_index"]
+            )
+            text = extract(m_s)
+            block = f"[Source {i}: {chunk[i]["file_path"]}]\n{text}"
+        else:
+            text = extract(chunk[i])
+            block = f"[Source {i}: {chunk[i].file_path}]\n{text}"
         blocks.append(block)
     return blocks
 
@@ -62,14 +71,26 @@ def get_answer(tokenizer, model, chunk):
     response = response.strip()
     if "</think>" in response:
         response = response.split("</think>")[-1]
-    
+
     return response
 
 
 def answer_data_set(tokenizer, model):
     data_set = get_data_set()
-    # recuperer le bon format donc [question, chunk]
-    # recuprer la reponse puis remplir MinimalAnswer
-    # et append dans une list pour chaque question et en faire une class StudentSearchResultsAndAnswer
+    list_MinimalAnswer = []
+    formated_chunk = []
     for data_model in data_set[0]:
-        answer = get_answer(tokenizer, model)
+        formated_chunk = [{"question": data_model.question}]
+        formated_chunk.extend(c for c in data_model.retrieved_sources)
+        response = get_answer(tokenizer, model, formated_chunk)
+        list_MinimalAnswer.append(MinimalAnswer(
+                                                question_id=data_model.question_id,
+                                                question=data_model.question,
+                                                retrieved_sources=data_model.retrieved_sources,
+                                                answer=response
+                                                ))
+
+    res_and_answer = StudentSearchResultsAndAnswer(search_results=list_MinimalAnswer)
+
+    with open(OUTPUT_ANSWER_DATA_SET, 'w') as f:
+        f.write(json.dumps(res_and_answer, ensure_ascii=False, indent=4))
