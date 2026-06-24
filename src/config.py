@@ -19,7 +19,7 @@ BM_FOLDER = "data/bm_data/"
 
 MODEL_NAME = "Qwen/Qwen3-0.6B"
 
-OVLAP = 800
+OVLAP = 30
 K1 = 2.0
 B = 0.7
 MIN_CHUNK = 50
