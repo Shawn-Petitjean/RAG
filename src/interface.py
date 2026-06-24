@@ -12,7 +12,8 @@ from .index import py_chunking, md_chunking
 from .search import gather_data_set, process_data_set, save_search
 from .bm25 import bm_tokeniser
 from .answer import get_answer, answer_data_set
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from .evaluate import find_recall_metric
+# from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Any
 import json
 import bm25s
@@ -83,4 +84,15 @@ class Cli(object):
         answer_data_set(tokenizer, model)
 
     def evaluate(self) -> None:
-        ...
+        results = []
+        for i in range(1, 5):
+            results.append(find_recall_metric("data/public/AnsweredQuestions/dataset_docs_public.json","data/output/output_doc_set.json", i))
+        order = [1, 3, 5, 10]
+        for i, result in enumerate(results):
+            print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
+
+    
+    def prerun(self, chunk_size: int):
+        self.index(chunk_size)
+        self.search_data_set()
+        self.evaluate()
