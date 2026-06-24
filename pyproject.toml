@@ -12,7 +12,8 @@ dependencies = [
     "bm25s",
     "chromadb",
     "mypy",
-    "pydantic"
+    "pydantic",
+    "types-tqdm",
 ]
 
 [build-system]
