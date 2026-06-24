@@ -46,15 +46,11 @@ install:
 		done; \
 		wait $$pid'
 
-	@echo "\n$(YELLOW)Downloading NLTK data...$(RESET)"
-	@$(PYTHON) -c "import nltk; nltk.download('stopwords', quiet=True); nltk.download('punkt_tab', quiet=True)"
-	@echo "$(GREEN)NLTK data ready$(RESET)"
-
 	@echo "\n$(GREEN)All dependencies successfully installed$(RESET)"
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
 
 run:
-	@$(HF_SETUP) uv run python -m $(EXE) prerun 2000 $(FLAGS)
+	@$(HF_SETUP) uv run python -m $(EXE) prerun 1000 $(FLAGS)
 
 lint:
 	@echo "$(BOLD)Verifying project source code:$(RESET)"

@@ -1,4 +1,4 @@
-from .utils import get_files, save_file
+from .utils import get_files, save_file, preprocess_append
 from .config import (
                      VLLM_FILE,
                      BM_FOLDER,
@@ -6,7 +6,8 @@ from .config import (
                      MODEL_NAME,
                      OUTPUT_ANSWER,
                      OUTPUT_CODE_SET,
-                     OUTPUT_DOC_SET
+                     OUTPUT_DOC_SET,
+                     STOPWORDS
                     )
 from .index import py_chunking, md_chunking
 from .search import gather_data_set, process_data_set, save_search
@@ -44,7 +45,9 @@ class Cli(object):
         if not os.path.exists(BM_FOLDER):
             raise ValueError("Please use the commande index before")
         retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
-        query_token = bm25s.tokenize([query])
+        query_token = bm25s.tokenize(
+            [preprocess_append(query)], stopwords=STOPWORDS
+        )
         results, scores = retriever.retrieve(query_token, k=k)
         question = [{"question": query}]
         res_chunk = save_search(results[0])
@@ -84,15 +87,28 @@ class Cli(object):
         answer_data_set(tokenizer, model)
 
     def evaluate(self) -> None:
-        results = []
-        for i in range(1, 5):
-            results.append(find_recall_metric("data/public/AnsweredQuestions/dataset_docs_public.json","data/output/output_doc_set.json", i))
         order = [1, 3, 5, 10]
-        for i, result in enumerate(results):
+        print("--- DOCS ---")
+        doc_results = []
+        for val in order:
+            doc_results.append(find_recall_metric(
+                "data/public/AnsweredQuestions/dataset_docs_public.json",
+                "data/output/output_doc_set.json", val
+            ))
+        for i, result in enumerate(doc_results):
             print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
 
-    
-    def prerun(self, chunk_size: int):
+        print("--- CODE ---")
+        code_results = []
+        for val in order:
+            code_results.append(find_recall_metric(
+                "data/public/AnsweredQuestions/dataset_code_public.json",
+                "data/output/output_code_set.json", val
+            ))
+        for i, result in enumerate(code_results):
+            print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
+
+    def prerun(self, chunk_size: int) -> None:
         self.index(chunk_size)
-        self.search_data_set()
+        self.search_data_set(k=10)
         self.evaluate()

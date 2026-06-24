@@ -12,10 +12,7 @@ dependencies = [
     "bm25s",
     "chromadb",
     "mypy",
-    "pydantic",
-    "accelerate",
-    "torch",
-    "transformers"
+    "pydantic"
 ]
 
 [build-system]

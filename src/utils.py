@@ -1,6 +1,7 @@
 from .data_model import MinimalSource
 from pathlib import Path
 import json
+import re
 from os import path, makedirs
 from typing import Any
 from .config import (
@@ -8,33 +9,6 @@ from .config import (
                      OUTPUT_DOCS,
                      OUTPUT_FILE,
                     )
-
-
-def lst_line(txt: str, i: int) -> int | None:
-    while txt[i] != "\n":
-        i -= 1
-    while txt[i] == "\n":
-        i -= 1
-    for j in range(i, 0, -1):
-        if txt[j] == "\n" and i - j > 10:
-            return j + 1
-    return None  # Sécurité si la condition du for n'est jamais respectée
-
-
-def get_index(line1: int, line2: int, path: str) -> list[int]:
-    with open(path, mode='r') as data:
-        s = data.readlines()
-    i_start = 0
-    i_end = 0
-    c_line = 0
-    for line in s:
-        c_line += 1
-        if c_line > line2:
-            break
-        elif c_line < line1:
-            i_start += len(line)
-        i_end += len(line)
-    return [i_start + 1, i_end - 1]
 
 
 def extract(m_s: MinimalSource) -> str:
@@ -84,3 +58,31 @@ def get_chunk() -> Any:
         code = json.load(cod_data)
     docs.extend(code)
     return docs
+
+
+def preprocess_append(text: str) -> str:
+    words = text.split()
+    new_words = []
+    for w in words:
+        new_words.append(w)
+        has_under = "_" in w
+        has_camel = re.search(r'([a-z0-9])([A-Z])', w) is not None
+        if has_under or has_camel:
+            split_w = w
+            if has_camel:
+                split_w = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', split_w)
+            if has_under:
+                split_w = split_w.replace("_", " ")
+            new_words.append(split_w)
+    return " ".join(new_words)
+
+
+def preprocess_with_path(text: str, file_path: str) -> str:
+    text_preprocessed = preprocess_append(text)
+    path_parts = re.split(r'[/._\-]', file_path)
+    path_words = []
+    for part in path_parts:
+        part_split = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', part)
+        path_words.append(part_split)
+    path_str = " ".join(path_words)
+    return text_preprocessed + " " + path_str

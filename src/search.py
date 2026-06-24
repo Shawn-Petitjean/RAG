@@ -3,14 +3,15 @@ from .config import (
                      UNANSWER_CODE,
                      OUTPUT_DOC_SET,
                      OUTPUT_CODE_SET,
-                     OUTPUT_CHUNK
+                     OUTPUT_CHUNK,
+                     STOPWORDS
                     )
 from .data_model import (
                          UnansweredQuestion,
                          MinimalSearchResults,
                          StudentSearchResults
                         )
-from .utils import get_chunk
+from .utils import get_chunk, preprocess_append
 import json
 import bm25s
 from typing import Any
@@ -47,7 +48,9 @@ def process_data_set(data_set: tuple[list[UnansweredQuestion],
     code_search_res = []
     doc_search_res = []
     for code in data_set[0]:
-        query_token = bm25s.tokenize([code.question])
+        query_token = bm25s.tokenize(
+            [preprocess_append(code.question)], stopwords=STOPWORDS
+        )
         results, scores = retriever.retrieve(query_token, k=k)
         res_chunk = save_search(results[0])
         code_search_res.append(MinimalSearchResults(
@@ -60,7 +63,9 @@ def process_data_set(data_set: tuple[list[UnansweredQuestion],
             k=k
         )
     for doc in data_set[1]:
-        query_token = bm25s.tokenize([doc.question])
+        query_token = bm25s.tokenize(
+            [preprocess_append(doc.question)], stopwords=STOPWORDS
+        )
         results, scores = retriever.retrieve(query_token, k=k)
         res_chunk = save_search(results[0])
         doc_search_res.append(MinimalSearchResults(
