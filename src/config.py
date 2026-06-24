@@ -8,7 +8,7 @@ OUTPUT_ANSWER_DATA_SET = "data/output/answer_data_set.json"
 
 OUTPUT_FILE = "data/output"
 
-VLLM_FILE = "vllm-0.10.1"
+VLLM_FILE = "data/raw/vllm-0.10.1"
 
 ANSWER_CODE = "data/public/AnsweredQuestions/dataset_code_public.json"
 ANSWER_DOCS = "data/public/AnsweredQuestions/dataset_docs_public.json"
@@ -19,7 +19,10 @@ BM_FOLDER = "data/bm_data/"
 
 MODEL_NAME = "Qwen/Qwen3-0.6B"
 
-OVLAP = 50
+OVLAP = 30
+K1 = 1.2
+B = 0.55
+MIN_CHUNK = 50
 
 SYSTEM_PROMPT = """You are a documentation assistant for the vLLM project.
 Answer the user's question using ONLY the information in the provided sources.
