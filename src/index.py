@@ -1,8 +1,52 @@
 from .data_model import MinimalSource
 from .config import OVLAP
+from .utils import get_index
+import ast
+
+
+def cut(txt: str, first_i: int, last_i: int, file: str,
+        m_char: int) -> list[MinimalSource]:
+    list_MS = []
+    end_i = first_i
+    start_i = first_i
+    for i in range(first_i, last_i + 1):
+        if end_i - start_i == m_char:
+            list_MS.append(MinimalSource(file_path=file,
+                                         first_character_index=start_i,
+                                         last_character_index=end_i))
+
+            start_i = end_i - OVLAP
+        elif last_i - start_i < m_char:
+            break
+        end_i += 1
+    list_MS.append(MinimalSource(file_path=file,
+                                 first_character_index=start_i,
+                                 last_character_index=last_i))
+    return list_MS
 
 
 def py_chunking(file: str, m_char: int) -> list[MinimalSource]:
+    l_m_s = []
+    with open(file, mode='r') as data:
+        txt = data.read()
+        tree = ast.parse(txt)
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                end_line = (node.end_lineno if node.end_lineno
+                            is not None else node.lineno)
+                i_line = get_index(node.lineno, end_line, file)
+                if i_line[1] - i_line[0] <= m_char:
+                    l_m_s.append(MinimalSource(file_path=file,
+                                               first_character_index=i_line[0],
+                                               last_character_index=i_line[1]))
+                else:
+                    new = cut(txt, i_line[0], i_line[1], file, m_char)
+                    for ch in new:
+                        l_m_s.append(ch)
+    return l_m_s
+
+
+def md_chunking(file: str, m_char: int) -> list[MinimalSource]:
     with open(file, mode='r', encoding='utf-8', errors='ignore') as data:
         content = data.read()
 
@@ -35,7 +79,3 @@ def py_chunking(file: str, m_char: int) -> list[MinimalSource]:
         if start >= content_len:
             break
     return chunks
-
-
-def md_chunking(file: str, m_char: int) -> list[MinimalSource]:
-    return py_chunking(file, m_char)
