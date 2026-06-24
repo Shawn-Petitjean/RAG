@@ -3,8 +3,6 @@ from .config import (
                      VLLM_FILE,
                      BM_FOLDER,
                      OUTPUT_CHUNK,
-                     MODEL_NAME,
-                     OUTPUT_ANSWER,
                      OUTPUT_CODE_SET,
                      OUTPUT_DOC_SET,
                      STOPWORDS
@@ -12,13 +10,15 @@ from .config import (
 from .index import py_chunking, md_chunking
 from .search import gather_data_set, process_data_set, save_search
 from .bm25 import bm_tokeniser
-from .answer import get_answer, answer_data_set
+# from .config import OUTPUT_ANSWER, MODEL_NAME
+# from .answer import get_answer, answer_data_set
 from .evaluate import find_recall_metric
 # from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Any
 import json
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 import os
+from tqdm import tqdm
 
 
 class Cli(object):
@@ -32,7 +32,11 @@ class Cli(object):
         lst_files = get_files(VLLM_FILE)
         py_chunk: list[Any] = []
         md_chunk: list[Any] = []
-        for file in lst_files:
+        for file in tqdm(
+                        lst_files,
+                        desc="chunking files...",
+                        bar_format="{desc} {bar} {percentage:.0f}%"
+                        ):
             if file.endswith(".py"):
                 py_chunk.extend(py_chunking(file, chunk_size))
             elif file.endswith(".md"):
@@ -71,20 +75,20 @@ class Cli(object):
                     return
         except FileExistsError:
             print("Please use the commande search before")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-        result = get_answer(tokenizer, model, chunk)
-        output = {"answer": result}
-        with open(OUTPUT_ANSWER, 'w') as f:
-            f.write(json.dumps(output, ensure_ascii=False, indent=4))
+        # tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        # model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+        # result = get_answer(tokenizer, model, chunk)
+        # output = {"answer": result}
+        # with open(OUTPUT_ANSWER, 'w') as f:
+        #     f.write(json.dumps(output, ensure_ascii=False, indent=4))
 
     def answer_data_set(self) -> None:
         if (not os.path.exists(OUTPUT_DOC_SET) or
            not os.path.exists(OUTPUT_CODE_SET)):
             raise ValueError("Please use the commande search_data_set before")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-        answer_data_set(tokenizer, model)
+        # tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        # model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+        # answer_data_set(tokenizer, model)
 
     def evaluate(self) -> None:
         order = [1, 3, 5, 10]

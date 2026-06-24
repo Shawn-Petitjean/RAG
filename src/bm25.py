@@ -1,13 +1,19 @@
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 from typing import Any
 from .data_model import MinimalSource
 from .utils import extract, preprocess_with_path
 from .config import BM_FOLDER, STOPWORDS, K1, B
+from tqdm import tqdm
 
 
 def bm_tokeniser(list_MA: list[MinimalSource]) -> None:
     texts: list[str] = [
-        preprocess_with_path(extract(c), c.file_path) for c in list_MA
+        preprocess_with_path(extract(c), c.file_path) for c in tqdm(
+            list_MA,
+            desc="process text to give at bm25...",
+            bar_format="{desc} {bar} {percentage:.0f}%",
+            leave=False
+            )
     ]
 
     corpus_tokens: Any = bm25s.tokenize(texts, stopwords=STOPWORDS)

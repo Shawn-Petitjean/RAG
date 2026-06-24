@@ -13,8 +13,9 @@ from .data_model import (
                         )
 from .utils import get_chunk, preprocess_append
 import json
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 from typing import Any
+from tqdm import tqdm
 
 
 def save_search(res: list[int]) -> list[Any]:
@@ -47,7 +48,11 @@ def process_data_set(data_set: tuple[list[UnansweredQuestion],
                      retriever: Any, k: int) -> None:
     code_search_res = []
     doc_search_res = []
-    for code in data_set[0]:
+    for code in tqdm(
+                    data_set[0],
+                    desc="Searching for code question with bm25",
+                    bar_format="{desc} {bar} {percentage:.0f}%"
+                    ):
         query_token = bm25s.tokenize(
             [preprocess_append(code.question)], stopwords=STOPWORDS
         )
@@ -62,7 +67,11 @@ def process_data_set(data_set: tuple[list[UnansweredQuestion],
             search_results=code_search_res,
             k=k
         )
-    for doc in data_set[1]:
+    for doc in tqdm(
+                    data_set[1],
+                    desc="Searching for doc question with bm25",
+                    bar_format="{desc} {bar} {percentage:.0f}%"
+                    ):
         query_token = bm25s.tokenize(
             [preprocess_append(doc.question)], stopwords=STOPWORDS
         )

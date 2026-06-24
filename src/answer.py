@@ -14,6 +14,7 @@ from .config import (
                     )
 from typing import Any
 import json
+from tqdm import tqdm
 
 
 def get_data_set() -> tuple[
@@ -85,7 +86,11 @@ def answer_data_set(tokenizer: Any, model: Any) -> None:
     data_set = get_data_set()
     list_MinimalAnswer: list[MinimalAnswer] = []
     formated_chunk: list[Any] = []
-    for data_model in data_set[0]:
+    for data_model in tqdm(
+                          data_set[0],
+                          desc="Aswering data_set...",
+                          bar_format="{desc} {bar} {percentage:.0f}%"
+                          ):
         formated_chunk = [{"question": data_model.question}]
         formated_chunk.extend(c for c in data_model.retrieved_sources)
         response = get_answer(tokenizer, model, formated_chunk)
