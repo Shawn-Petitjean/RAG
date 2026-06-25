@@ -101,7 +101,7 @@ def get_answer(tokenizer: Any, model: Any, chunk: list[Any]) -> str:
                                          add_generation_prompt=True)
     inputs = tokenizer(text, return_tensors="pt")
 
-    outputs = model.generate(**inputs, max_new_tokens=350, temperature=0.3,
+    outputs = model.generate(**inputs, max_new_tokens=450, temperature=0.3,
                              do_sample=True)
     response: str = tokenizer.decode(
         outputs[0][inputs["input_ids"].shape[1]:],

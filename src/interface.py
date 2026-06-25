@@ -16,7 +16,7 @@ from .evaluate import find_recall_metric
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Any
 import json
-import bm25s  # type: ignore[import-untyped]
+import bm25s
 import os
 from tqdm import tqdm
 

@@ -1,33 +1,3 @@
-# import json
-
-
-# def pre_answer(dataset_path):
-#     with open(dataset_path, 'r') as data:
-#         answers = json.load(data)
-#     lst_ans = []
-#     for answer in answers["rag_questions"]:
-#         question = answer["question"]
-#         sources = answer["sources"]
-#         res = (question, sources)
-#         lst_an.append(res)
-#     return lst_an
-
-
-# def format_stud_answer(student_answer_path):
-#     with open(student_answer_pat, 'r') as data:
-#         answers = json.load(data)
-
-# def evaluate_all(student_answer_path, dataset_path):
-#     answered_q = pre_answer(dataset_path)
-#     stud_answer = format_stud_answer(student_answer_pat)
-
-
-# """Recall metric evaluation module.
-
-# This module provides functions for evaluating retrieval quality using
-# recall metrics.
-# """
-
 import json
 from typing import List
 
