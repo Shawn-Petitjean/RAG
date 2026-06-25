@@ -20,6 +20,11 @@ from tqdm import tqdm
 def get_data_set() -> tuple[
     list[MinimalSearchResults], list[MinimalSearchResults]
 ]:
+    """It open the right file and format them.
+
+    Returns:
+        return two list with the chunk and the question, code and docs
+    """
     with open(OUTPUT_CODE_SET, 'r') as data:
         code = json.load(data)
     with open(OUTPUT_DOC_SET, 'r') as data:
@@ -30,6 +35,14 @@ def get_data_set() -> tuple[
 
 
 def get_context(chunk: list[Any]) -> list[str]:
+    """It make the list of chunk into a context readable by the LLM.
+
+    Args:
+        chunk: list of chunk
+
+    Returns:
+        string that contain the context
+    """
     blocks = []
     for i in range(1, 6):
         if not isinstance(chunk[i], MinimalSource):
@@ -48,6 +61,15 @@ def get_context(chunk: list[Any]) -> list[str]:
 
 
 def prompt_gen(question: str, chunk: list[Any]) -> list[dict[str, str]]:
+    """Format the prompt with context and pre_prompt.
+
+    Args:
+        question: question for the LLM.
+        chunk: question that the bm25 give us for the question.
+
+    Returns:
+        list of dict that contain good input to give for the LLM.
+    """
     context = get_context(chunk)
 
     user_message = f"""Context:
@@ -64,6 +86,16 @@ def prompt_gen(question: str, chunk: list[Any]) -> list[dict[str, str]]:
 
 
 def get_answer(tokenizer: Any, model: Any, chunk: list[Any]) -> str:
+    """Generate the response with the model given.
+
+    Args:
+        tokenizer: tokenizer for the LLM.
+        model: the llm that gonna answer the question.
+        chunk: list with the question and chunk
+
+    Returns:
+        return the answer without the thinking.
+    """    
     messages = prompt_gen(chunk[0]["question"], chunk)
     text = tokenizer.apply_chat_template(messages, tokenize=False,
                                          add_generation_prompt=True)
@@ -83,6 +115,15 @@ def get_answer(tokenizer: Any, model: Any, chunk: list[Any]) -> str:
 
 
 def answer_data_set(tokenizer: Any, model: Any) -> None:
+    """Generate the response for all the data set.
+
+    Args:
+        tokenizer: tokenizer for the LLM.
+        model: the llm that gonna answer the question.
+
+    Returns:
+        return a StudentSearchResultsAndAnswer with all the answer and chunk.
+    """  
     data_set = get_data_set()
     list_MinimalAnswer: list[MinimalAnswer] = []
     formated_chunk: list[Any] = []

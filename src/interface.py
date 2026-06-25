@@ -22,10 +22,16 @@ from tqdm import tqdm
 
 
 class Cli(object):
-    def __init__(self) -> None:
-        ...
-
     def index(self, chunk_size: int) -> None:
+        """Indexation and chunking of all the vllm file.
+
+        Args:
+            self: self.
+            chunk_size: limit of the char max in a chunk.
+
+        Returns:
+            None but save the index and data of the bm25.
+        """
         if chunk_size < 250 or chunk_size > 2000:
             raise ValueError("wrong max chunk size," +
                              "please try between 250 and 2000")
@@ -46,6 +52,16 @@ class Cli(object):
         bm_tokeniser(md_chunk)
 
     def search(self, query: str, k: int = 5) -> None:
+        """searching the right chunk for the query given.
+
+        Args:
+            self: self.
+            query: question given.
+            k: number of chunk for the query
+
+        Returns:
+            None but save the chunk find with the query.
+        """
         if not os.path.exists(BM_FOLDER):
             raise ValueError("Please use the commande index before")
         retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
@@ -60,6 +76,15 @@ class Cli(object):
             f.write(json.dumps(question, ensure_ascii=False, indent=4))
 
     def search_data_set(self, k: int = 5) -> None:
+        """searching the right chunk for the data_set.
+
+        Args:
+            self: self.
+            k: number of chunk for the query
+
+        Returns:
+            None but save the chunk find with the query.
+        """
         if not os.path.exists(BM_FOLDER):
             raise ValueError("Please use the commande index before")
         retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
@@ -67,6 +92,14 @@ class Cli(object):
         process_data_set(data_set, retriever, k)
 
     def answer(self) -> None:
+        """Take the query and chunk find in search and answer it with a llm.
+
+        Args:
+            self: self.
+
+        Returns:
+            None but save the answer with the chunk find and query.
+        """
         try:
             with open(OUTPUT_CHUNK, 'r') as data:
                 chunk = json.load(data)
@@ -83,6 +116,15 @@ class Cli(object):
         #     f.write(json.dumps(output, ensure_ascii=False, indent=4))
 
     def answer_data_set(self) -> None:
+        """Take the query in data_set and chunk
+           find in search and answer it with a llm.
+
+        Args:
+            self: self.
+
+        Returns:
+            None but save the answer with the chunk find and query.
+        """
         if (not os.path.exists(OUTPUT_DOC_SET) or
            not os.path.exists(OUTPUT_CODE_SET)):
             raise ValueError("Please use the commande search_data_set before")
@@ -91,13 +133,23 @@ class Cli(object):
         # answer_data_set(tokenizer, model)
 
     def evaluate(self) -> None:
+        """Evaluate the chunk find and the query and compare it
+           with Answered question and give a recall k score to it
+
+        Args:
+            self: self.
+
+        Returns:
+            None but print the recall score for docs and code.
+        """
         order = [1, 3, 5, 10]
         print("--- DOCS ---")
         doc_results = []
         for val in order:
             doc_results.append(find_recall_metric(
                 "data/public/AnsweredQuestions/dataset_docs_public.json",
-                "data/output/output_doc_set.json", val
+                OUTPUT_DOC_SET,
+                val
             ))
         for i, result in enumerate(doc_results):
             print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
@@ -107,7 +159,8 @@ class Cli(object):
         for val in order:
             code_results.append(find_recall_metric(
                 "data/public/AnsweredQuestions/dataset_code_public.json",
-                "data/output/output_code_set.json", val
+                OUTPUT_CODE_SET,
+                val
             ))
         for i, result in enumerate(code_results):
             print(f"k@{order[i]} ; {int(result * 100)}% ({result})")

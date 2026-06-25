@@ -19,6 +19,14 @@ from tqdm import tqdm
 
 
 def save_search(res: list[int]) -> list[Any]:
+    """Save the result that be found.
+
+    Args:
+        self: self.
+
+    Returns:
+        None but save the answer with the chunk find and query.
+    """
     chunk = get_chunk()
     res_chunk = []
     for i in range(0, len(res)):
@@ -32,6 +40,11 @@ def save_search(res: list[int]) -> list[Any]:
 
 def gather_data_set() -> tuple[list[UnansweredQuestion],
                                list[UnansweredQuestion]]:
+    """Open the files and format them
+
+    Returns:
+        list of the data_class with the good format.
+    """
     with open(UNANSWER_DOCS, 'r') as data:
         docs = json.load(data)
     with open(UNANSWER_CODE, 'r') as data:
@@ -46,6 +59,16 @@ def gather_data_set() -> tuple[list[UnansweredQuestion],
 def process_data_set(data_set: tuple[list[UnansweredQuestion],
                      list[UnansweredQuestion]],
                      retriever: Any, k: int) -> None:
+    """Take the question and chunk, and give them to
+       bm25 for finding the good chunk.
+
+    Args:
+        data_set: tuple that contain all of chunk and question.
+
+    Returns:
+        Save a json with the StudentSearchResults
+        that contain question and chunk associated.
+    """
     code_search_res = []
     doc_search_res = []
     for code in tqdm(

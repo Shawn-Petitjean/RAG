@@ -7,6 +7,14 @@ from tqdm import tqdm
 
 
 def bm_tokeniser(list_MA: list[MinimalSource]) -> None:
+    """Tokenize all of the data set and save the bm25 data for the searching.
+
+    Args:
+        list_MA: list of MinimalSource that contain all the chunk.
+
+    Returns:
+        None but save the data at BM_FOLDER.
+    """
     texts: list[str] = [
         preprocess_with_path(extract(c), c.file_path) for c in tqdm(
             list_MA,

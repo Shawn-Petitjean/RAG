@@ -6,6 +6,17 @@ import ast
 
 def cut(txt: str, first_i: int, last_i: int, file: str,
         m_char: int) -> list[MinimalSource]:
+    """cut the text between first_i and last_i with respecting the m_char.
+
+    Args:
+        txt: text given where the index come frome.
+        first_i: first index where the cut begin.
+        last_i: last index where the cut ending.
+        m_char: number of character max a chunk can be.
+
+    Returns:
+        list of MinimalSource that contain the chunk cut between the index.
+    """
     list_MS = []
     end_i = first_i
     start_i = first_i
@@ -26,6 +37,15 @@ def cut(txt: str, first_i: int, last_i: int, file: str,
 
 
 def py_chunking(file: str, m_char: int) -> list[MinimalSource]:
+    """Chunking of a python file with the number of charactere max it can be.
+
+    Args:
+        file: path of the py file that gonna be chunk.
+        m_char: limit of the char max in a chunk.
+
+    Returns:
+        list of MinimalSource that contain the chunk cut in all the file.
+    """
     l_m_s = []
     with open(file, mode='r') as data:
         txt = data.read()
@@ -47,6 +67,15 @@ def py_chunking(file: str, m_char: int) -> list[MinimalSource]:
 
 
 def md_chunking(file: str, m_char: int) -> list[MinimalSource]:
+    """Chunking of a markdown file with the number of charactere max it can be.
+
+    Args:
+        file: path of the py file that gonna be chunk.
+        m_char: limit of the char max in a chunk.
+
+    Returns:
+        list of MinimalSource that contain the chunk cut in all the file.
+    """
     with open(file, mode='r', encoding='utf-8', errors='ignore') as data:
         content = data.read()
 

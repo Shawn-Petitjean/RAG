@@ -12,6 +12,16 @@ from .config import (
 
 
 def get_index(line1: int, line2: int, path: str) -> list[int]:
+    """Get the index of the line given.
+
+    Args:
+        line1: the num of the first line to find the index.
+        line2: the num of the last line to find the index.
+        path: path of the file we need to find the index.
+
+    Returns:
+        return a list with the two index of the line given
+    """
     with open(path, mode='r') as data:
         s = data.readlines()
     i_start = 0
@@ -28,12 +38,29 @@ def get_index(line1: int, line2: int, path: str) -> list[int]:
 
 
 def extract(m_s: MinimalSource) -> str:
+    """Extract the txt of the minimal_source.
+
+    Args:
+        MinimalSource: Minimal source 
+        that contain path end index of start and end.
+
+    Returns:
+        return the extracted text
+    """
     with open(m_s.file_path, mode='r') as data:
         txt = data.read()
         return txt[m_s.first_character_index - 1: m_s.last_character_index - 1]
 
 
 def get_files(dir: str) -> list[str]:
+    """ Recursive algo to find all the python an markdown inside a file.
+
+    Args:
+        dir: the directory where we need to find the py and md files
+
+    Returns:
+        return the path of py and md files found
+    """
     dir_path = Path(dir)
     files: list[str] = []
     for f in dir_path.iterdir():
@@ -46,6 +73,15 @@ def get_files(dir: str) -> list[str]:
 
 
 def save_file(py_chunk: list[Any], md_chunk: list[Any]) -> None:
+    """ Save the chunk find inside a json.
+
+    Args:
+        py_chunk: list of python chunk.
+        md_chunk: list of markdown chunk
+
+    Returns:
+        return the path of py and md files found
+    """
     if not path.exists(OUTPUT_FILE):
         makedirs(OUTPUT_FILE)
 
@@ -68,6 +104,11 @@ def save_file(py_chunk: list[Any], md_chunk: list[Any]) -> None:
 
 
 def get_chunk() -> Any:
+    """ open file and return all the chunk that been saved.
+
+    Returns:
+        return all the chunk
+    """
     with open(OUTPUT_DOCS, 'r') as doc_data:
         docs = json.load(doc_data)
     with open(OUTPUT_CODE, 'r') as cod_data:
@@ -77,6 +118,23 @@ def get_chunk() -> Any:
 
 
 def preprocess_append(text: str) -> str:
+    """Expand technical tokens by appending their split forms to the text.
+
+    For each word containing snake_case or camelCase patterns, the original
+    word is kept and its split version is appended alongside it. This allows
+    BM25 to match both 'load_model_weights' and individual terms like
+    'load', 'model', 'weights'.
+
+    Args:
+        text: Raw text to preprocess.
+
+    Returns:
+        Expanded text with split tokens appended after their original forms.
+
+    Examples:
+        >>> preprocess_append("call myFunction and load_weights")
+        "call myFunction my Function and load_weights load weights"
+    """
     words = text.split()
     new_words = []
     for w in words:
@@ -94,6 +152,24 @@ def preprocess_append(text: str) -> str:
 
 
 def preprocess_with_path(text: str, file_path: str) -> str:
+    """Preprocess text and enrich it with tokenized file path components.
+
+    Applies `preprocess_append` to the main text, then splits the file path
+    on common separators (/, ., _, -) and expands any camelCase parts.
+    The resulting path tokens are appended to the text so that BM25 can
+    match queries containing directory names, file names, or extensions.
+
+    Args:
+        text: Raw chunk content to preprocess.
+        file_path: Path of the source file (e.g. 'src/utils/myParser.py').
+
+    Returns:
+        Preprocessed text with path tokens appended.
+
+    Examples:
+        >>> preprocess_with_path("parse tokens", "src/utils/myParser.py")
+        "parse tokens ... src utils my Parser py"
+    """
     text_preprocessed = preprocess_append(text)
     path_parts = re.split(r'[/._\-]', file_path)
     path_words = []
