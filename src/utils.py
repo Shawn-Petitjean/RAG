@@ -41,7 +41,7 @@ def extract(m_s: MinimalSource) -> str:
     """Extract the txt of the minimal_source.
 
     Args:
-        MinimalSource: Minimal source 
+        MinimalSource: Minimal source
         that contain path end index of start and end.
 
     Returns:

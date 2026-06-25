@@ -10,10 +10,10 @@ from .config import (
 from .index import py_chunking, md_chunking
 from .search import gather_data_set, process_data_set, save_search
 from .bm25 import bm_tokeniser
-# from .config import OUTPUT_ANSWER, MODEL_NAME
-# from .answer import get_answer, answer_data_set
+from .config import OUTPUT_ANSWER, MODEL_NAME
+from .answer import get_answer, answer_data_set
 from .evaluate import find_recall_metric
-# from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Any
 import json
 import bm25s  # type: ignore[import-untyped]
@@ -108,12 +108,12 @@ class Cli(object):
                     return
         except FileExistsError:
             print("Please use the commande search before")
-        # tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-        # model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-        # result = get_answer(tokenizer, model, chunk)
-        # output = {"answer": result}
-        # with open(OUTPUT_ANSWER, 'w') as f:
-        #     f.write(json.dumps(output, ensure_ascii=False, indent=4))
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+        result = get_answer(tokenizer, model, chunk)
+        output = {"answer": result}
+        with open(OUTPUT_ANSWER, 'w') as f:
+            f.write(json.dumps(output, ensure_ascii=False, indent=4))
 
     def answer_data_set(self) -> None:
         """Take the query in data_set and chunk
@@ -128,21 +128,17 @@ class Cli(object):
         if (not os.path.exists(OUTPUT_DOC_SET) or
            not os.path.exists(OUTPUT_CODE_SET)):
             raise ValueError("Please use the commande search_data_set before")
-        # tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-        # model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-        # answer_data_set(tokenizer, model)
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+        answer_data_set(tokenizer, model)
 
     def evaluate(self) -> None:
-        """Evaluate the chunk find and the query and compare it
-           with Answered question and give a recall k score to it
+        with open(OUTPUT_DOC_SET, 'r') as f:
+            data = json.load(f)
 
-        Args:
-            self: self.
+        k = data["k"]  # utilise le vrai champ k
+        order = list(range(1, k + 1))  # [1, 2, 3, ..., k]
 
-        Returns:
-            None but print the recall score for docs and code.
-        """
-        order = [1, 3, 5, 10]
         print("--- DOCS ---")
         doc_results = []
         for val in order:
@@ -166,6 +162,14 @@ class Cli(object):
             print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
 
     def prerun(self, chunk_size: int) -> None:
+        """run index search_data_set and evaluate.
+
+        Args:
+            self: self.
+
+        Returns:
+            None.
+        """
         self.index(chunk_size)
         self.search_data_set(k=10)
         self.evaluate()

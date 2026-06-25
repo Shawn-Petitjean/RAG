@@ -95,7 +95,7 @@ def get_answer(tokenizer: Any, model: Any, chunk: list[Any]) -> str:
 
     Returns:
         return the answer without the thinking.
-    """    
+    """
     messages = prompt_gen(chunk[0]["question"], chunk)
     text = tokenizer.apply_chat_template(messages, tokenize=False,
                                          add_generation_prompt=True)
@@ -123,7 +123,7 @@ def answer_data_set(tokenizer: Any, model: Any) -> None:
 
     Returns:
         return a StudentSearchResultsAndAnswer with all the answer and chunk.
-    """  
+    """
     data_set = get_data_set()
     list_MinimalAnswer: list[MinimalAnswer] = []
     formated_chunk: list[Any] = []
