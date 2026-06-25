@@ -184,7 +184,7 @@ def answer_data_set(tokenizer: Any, model: Any) -> None:
     data_set = get_data_set()
     list_MinimalAnswer: list[MinimalAnswer] = []
     for data_model in tqdm(
-        data_set[0][:5],
+        data_set[0],
         desc="Answering data_set for code question...",
         bar_format="{desc} {bar} {percentage:.0f}%",
     ):
@@ -215,7 +215,7 @@ def answer_data_set(tokenizer: Any, model: Any) -> None:
         )
 
     for data_model in tqdm(
-        data_set[1][:5],
+        data_set[1],
         desc="Answering data_set for docs question...",
         bar_format="{desc} {bar} {percentage:.0f}%",
     ):
