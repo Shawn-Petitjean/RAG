@@ -1,7 +1,9 @@
 from .utils import get_files, save_file, preprocess_append
 from .config import (
                      VLLM_FILE,
-                     BM_FOLDER,
+                     BM_ALL,
+                     BM_MD,
+                     BM_PY,
                      OUTPUT_CHUNK,
                      OUTPUT_CODE_SET,
                      OUTPUT_DOC_SET,
@@ -16,7 +18,7 @@ from .evaluate import find_recall_metric
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Any
 import json
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 import os
 from tqdm import tqdm
 
@@ -48,8 +50,7 @@ class Cli(object):
             elif file.endswith(".md"):
                 md_chunk.extend(md_chunking(file, chunk_size))
         save_file(py_chunk, md_chunk)
-        md_chunk.extend(py_chunk)
-        bm_tokeniser(md_chunk)
+        bm_tokeniser(md_chunk, py_chunk)
 
     def search(self, query: str, k: int = 5) -> None:
         """searching the right chunk for the query given.
@@ -62,9 +63,9 @@ class Cli(object):
         Returns:
             None but save the chunk find with the query.
         """
-        if not os.path.exists(BM_FOLDER) or k > 10:
+        if not os.path.exists(BM_ALL) or k > 10:
             raise ValueError("Please use the commande index before")
-        retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
+        retriever = bm25s.BM25.load(BM_ALL, load_corpus=True)
         query_token = bm25s.tokenize(
             [preprocess_append(query)], stopwords=STOPWORDS
         )
@@ -85,11 +86,12 @@ class Cli(object):
         Returns:
             None but save the chunk find with the query.
         """
-        if not os.path.exists(BM_FOLDER) or k > 10:
+        if not os.path.exists(BM_PY) or k > 10:
             raise ValueError("Please use the commande index before")
-        retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
+        retriever_md = bm25s.BM25.load(BM_MD, load_corpus=True)
+        retriever_py = bm25s.BM25.load(BM_PY, load_corpus=True)
         data_set = gather_data_set()
-        process_data_set(data_set, retriever, k)
+        process_data_set(data_set, retriever_md, retriever_py, k)
 
     def answer(self) -> None:
         """Take the query and chunk find in search and answer it with a llm.
@@ -161,7 +163,7 @@ class Cli(object):
         for i, result in enumerate(code_results):
             print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
 
-    def prerun(self, chunk_size: int) -> None:
+    def run_all(self, chunk_size: int) -> None:
         """run index search_data_set and evaluate.
 
         Args:

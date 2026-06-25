@@ -4,7 +4,8 @@ from .config import (
                      OUTPUT_DOC_SET,
                      OUTPUT_CODE_SET,
                      OUTPUT_CHUNK,
-                     STOPWORDS
+                     ENGLISH_STOPWORDS,
+                     PYTHON_KEYWORDS
                     )
 from .data_model import (
                          UnansweredQuestion,
@@ -13,23 +14,24 @@ from .data_model import (
                         )
 from .utils import get_chunk, preprocess_append
 import json
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 from typing import Any
 from tqdm import tqdm
 
 
-def save_search(res: list[int]) -> list[Any]:
-    """Save the result that be found.
+def save_search(res: list[int], chunk_type: str = "all") -> list[Any]:
+    """Save the result that was found.
 
     Args:
-        self: self.
+        res: List of chunk indices.
+        chunk_type: One of "all", "doc", or "code".
 
     Returns:
-        None but save the answer with the chunk find and query.
+        The list of retrieved source chunks.
     """
-    chunk = get_chunk()
+    chunk = get_chunk(chunk_type)
     res_chunk = []
-    for i in range(0, len(res)):
+    for i in range(len(res)):
         res_chunk.append(chunk[res[i]])
 
     with open(OUTPUT_CHUNK, 'w') as f:
@@ -58,7 +60,7 @@ def gather_data_set() -> tuple[list[UnansweredQuestion],
 
 def process_data_set(data_set: tuple[list[UnansweredQuestion],
                      list[UnansweredQuestion]],
-                     retriever: Any, k: int) -> None:
+                     retriever_md: Any, retriever_py: Any, k: int) -> None:
     """Take the question and chunk, and give them to
        bm25 for finding the good chunk.
 
@@ -77,10 +79,10 @@ def process_data_set(data_set: tuple[list[UnansweredQuestion],
                     bar_format="{desc} {bar} {percentage:.0f}%"
                     ):
         query_token = bm25s.tokenize(
-            [preprocess_append(code.question)], stopwords=STOPWORDS
+            [preprocess_append(code.question)], stopwords=PYTHON_KEYWORDS
         )
-        results, scores = retriever.retrieve(query_token, k=k)
-        res_chunk = save_search(results[0])
+        results, scores = retriever_py.retrieve(query_token, k=k)
+        res_chunk = save_search(results[0], chunk_type="code")
         code_search_res.append(MinimalSearchResults(
                 question_id=code.question_id,
                 question=code.question,
@@ -96,10 +98,10 @@ def process_data_set(data_set: tuple[list[UnansweredQuestion],
                     bar_format="{desc} {bar} {percentage:.0f}%"
                     ):
         query_token = bm25s.tokenize(
-            [preprocess_append(doc.question)], stopwords=STOPWORDS
+            [preprocess_append(doc.question)], stopwords=ENGLISH_STOPWORDS
         )
-        results, scores = retriever.retrieve(query_token, k=k)
-        res_chunk = save_search(results[0])
+        results, scores = retriever_md.retrieve(query_token, k=k)
+        res_chunk = save_search(results[0], chunk_type="doc")
         doc_search_res.append(MinimalSearchResults(
                 question_id=doc.question_id,
                 question=doc.question,

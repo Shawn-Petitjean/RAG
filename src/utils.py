@@ -103,12 +103,21 @@ def save_file(py_chunk: list[Any], md_chunk: list[Any]) -> None:
         d.write(json.dumps(serialize(md_chunk), ensure_ascii=False, indent=4))
 
 
-def get_chunk() -> Any:
-    """ open file and return all the chunk that been saved.
+def get_chunk(chunk_type: str = "all") -> Any:
+    """Open saved chunks and return the requested chunk subset.
+
+    Args:
+        chunk_type: One of "all", "doc", or "code".
 
     Returns:
-        return all the chunk
+        The requested list of chunks.
     """
+    if chunk_type == "doc":
+        with open(OUTPUT_DOCS, 'r') as doc_data:
+            return json.load(doc_data)
+    if chunk_type == "code":
+        with open(OUTPUT_CODE, 'r') as cod_data:
+            return json.load(cod_data)
     with open(OUTPUT_DOCS, 'r') as doc_data:
         docs = json.load(doc_data)
     with open(OUTPUT_CODE, 'r') as cod_data:

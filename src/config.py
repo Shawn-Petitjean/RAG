@@ -4,7 +4,8 @@ OUTPUT_CHUNK = "data/output/output_chunk.json"
 OUTPUT_DOC_SET = "data/output/output_doc_set.json"
 OUTPUT_CODE_SET = "data/output/output_code_set.json"
 OUTPUT_ANSWER = "data/output/answer.json"
-OUTPUT_ANSWER_DATA_SET = "data/output/answer_data_set.json"
+OUTPUT_ANSWER_CODE_SET = "data/answer_code_set.json"
+OUTPUT_ANSWER_DOCS_SET = "data/answer_docs_set.json"
 
 OUTPUT_FILE = "data/output"
 
@@ -15,13 +16,15 @@ ANSWER_DOCS = "data/public/AnsweredQuestions/dataset_docs_public.json"
 UNANSWER_DOCS = "data/public/UnansweredQuestions/dataset_docs_public.json"
 UNANSWER_CODE = "data/public/UnansweredQuestions/dataset_code_public.json"
 
-BM_FOLDER = "data/bm_data/"
+BM_PY = "data/bm_py/"
+BM_MD = "data/bm_md/"
+BM_ALL = "data/bm_data"
 
 MODEL_NAME = "Qwen/Qwen3-0.6B"
 
 OVLAP = 30
-K1 = 2.0
-B = 0.7
+K1 = 1.5
+B = 0.5
 MIN_CHUNK = 50
 
 PYTHON_KEYWORDS = [
@@ -69,4 +72,9 @@ question.
 - Be faithful: never invent information that is not in the sources.
 - Be relevant: directly answer what was asked, no unrelated details.
 - If the sources do not contain the answer, say so clearly instead of guessing.
+- Use exactly this final output format:
+  ANSWER: <your answer>
+  SOURCES: <file_path1>
+  <file_path2>
+  <<END>>
 """
