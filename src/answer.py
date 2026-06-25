@@ -183,64 +183,37 @@ def answer_data_set(tokenizer: Any, model: Any) -> None:
     """Generate the response for the whole dataset."""
     data_set = get_data_set()
     list_MinimalAnswer: list[MinimalAnswer] = []
-    for data_model in tqdm(
-        data_set[0],
-        desc="Answering data_set for code question...",
-        bar_format="{desc} {bar} {percentage:.0f}%",
-    ):
-        formatted_chunk_py: list[dict[str, str] |
-                                 MinimalSource] = [{"question":
-                                                    data_model.question}]
-        formatted_chunk_py.extend(data_model.retrieved_sources)
-        response = get_answer(tokenizer, model, formatted_chunk_py)
-        list_MinimalAnswer.append(
-            MinimalAnswer(
-                question_id=data_model.question_id,
-                question=data_model.question,
-                retrieved_sources=data_model.retrieved_sources,
-                answer=response,
-            )
-        )
+    i = 0
 
-    res_and_answer = StudentSearchResultsAndAnswer(
-        search_results=list_MinimalAnswer,
-    )
-    with open(OUTPUT_ANSWER_CODE_SET, "w") as f:
-        f.write(
-            json.dumps(
-                res_and_answer.model_dump(),
-                ensure_ascii=False,
-                indent=4,
+    save = [OUTPUT_ANSWER_CODE_SET, OUTPUT_ANSWER_DOCS_SET]
+    for i in range(0, 2):
+        for data_model in tqdm(
+            data_set[i],
+            desc="Answering data_set question...",
+            bar_format="{desc} {bar} {percentage:.0f}%",
+        ):
+            formatted_chunk: list[dict[str, str] |
+                                  MinimalSource] = [{"question":
+                                                     data_model.question}]
+            formatted_chunk.extend(data_model.retrieved_sources)
+            response = get_answer(tokenizer, model, formatted_chunk)
+            list_MinimalAnswer.append(
+                MinimalAnswer(
+                    question_id=data_model.question_id,
+                    question=data_model.question,
+                    retrieved_sources=data_model.retrieved_sources,
+                    answer=response,
+                )
             )
-        )
 
-    for data_model in tqdm(
-        data_set[1],
-        desc="Answering data_set for docs question...",
-        bar_format="{desc} {bar} {percentage:.0f}%",
-    ):
-        formatted_chunk_md: list[dict[str, str] |
-                                 MinimalSource] = [{"question":
-                                                    data_model.question}]
-        formatted_chunk_md.extend(data_model.retrieved_sources)
-        response = get_answer(tokenizer, model, formatted_chunk_md)
-        list_MinimalAnswer.append(
-            MinimalAnswer(
-                question_id=data_model.question_id,
-                question=data_model.question,
-                retrieved_sources=data_model.retrieved_sources,
-                answer=response,
-            )
+        res_and_answer = StudentSearchResultsAndAnswer(
+            search_results=list_MinimalAnswer,
         )
-
-    res_and_answer = StudentSearchResultsAndAnswer(
-        search_results=list_MinimalAnswer,
-    )
-    with open(OUTPUT_ANSWER_DOCS_SET, "w") as f:
-        f.write(
-            json.dumps(
-                res_and_answer.model_dump(),
-                ensure_ascii=False,
-                indent=4,
+        with open(save[i], "w") as f:
+            f.write(
+                json.dumps(
+                    res_and_answer.model_dump(),
+                    ensure_ascii=False,
+                    indent=4,
+                )
             )
-        )
