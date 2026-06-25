@@ -62,7 +62,7 @@ class Cli(object):
         Returns:
             None but save the chunk find with the query.
         """
-        if not os.path.exists(BM_FOLDER):
+        if not os.path.exists(BM_FOLDER) or k > 10:
             raise ValueError("Please use the commande index before")
         retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
         query_token = bm25s.tokenize(
@@ -85,7 +85,7 @@ class Cli(object):
         Returns:
             None but save the chunk find with the query.
         """
-        if not os.path.exists(BM_FOLDER):
+        if not os.path.exists(BM_FOLDER) or k > 10:
             raise ValueError("Please use the commande index before")
         retriever = bm25s.BM25.load(BM_FOLDER, load_corpus=True)
         data_set = gather_data_set()
