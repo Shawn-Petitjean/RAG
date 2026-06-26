@@ -22,18 +22,31 @@ from transformers import StoppingCriteria, StoppingCriteriaList
 
 def get_data_set() -> tuple[list[MinimalSearchResults],
                             list[MinimalSearchResults]]:
-    """Open the right files and return search results."""
+    """Load student search results for code and docs.
+
+    Returns:
+        A tuple where the first element is a list of code search results and the
+        second element is a list of doc search results.
+    """
     with open(OUTPUT_CODE_SET, "r") as data:
         code = json.load(data)
     with open(OUTPUT_DOC_SET, "r") as data:
         doc = json.load(data)
     data_code = StudentSearchResults.model_validate(code)
     data_doc = StudentSearchResults.model_validate(doc)
-    return data_code.search_results, data_doc.search_results
+    return (data_code.search_results, data_doc.search_results)
 
 
 def get_context(chunk: list[Any]) -> str:
-    """Return a joined string of source context for the LLM."""
+    """Build a single context string from retrieved sources.
+
+    Args:
+        chunk: The retrieved chunk list whose elements include the question and
+            source entries.
+
+    Returns:
+        A joined string containing up to five source blocks for the LLM.
+    """
     blocks = []
     for idx in range(1, min(len(chunk), 6)):
         source = chunk[idx]
@@ -49,7 +62,14 @@ def get_context(chunk: list[Any]) -> str:
 
 
 def get_source_paths(chunk: list[Any]) -> list[str]:
-    """Return unique source file paths from the retrieved chunk."""
+    """Extract unique source file paths from a retrieved chunk.
+
+    Args:
+        chunk: The retrieved chunk list including source dictionaries.
+
+    Returns:
+        A list of unique file paths found in the retrieved sources.
+    """
     paths: list[str] = []
     seen = set()
     for source in chunk[1:]:
@@ -65,7 +85,15 @@ def get_source_paths(chunk: list[Any]) -> list[str]:
 
 
 def prompt_gen(question: str, chunk: list[Any]) -> list[dict[str, str]]:
-    """Build the prompt for the LLM using the retrieved context."""
+    """Build the chat prompt for the LLM using retrieved context.
+
+    Args:
+        question: The user question to answer.
+        chunk: The retrieved chunk list containing the question and sources.
+
+    Returns:
+        A list of message dictionaries for the chat-based LLM.
+    """
     context = get_context(chunk)
     user_message = (
         "Context:\n"
@@ -90,7 +118,14 @@ def prompt_gen(question: str, chunk: list[Any]) -> list[dict[str, str]]:
 
 
 def parse_response(response: str) -> tuple[str, list[str]]:
-    """Extract the answer and the source file paths from the LLM response."""
+    """Parse the LLM response into answer text and source paths.
+
+    Args:
+        response: The raw text returned by the LLM.
+
+    Returns:
+        A tuple containing the answer text and a list of source file paths.
+    """
     response = response.strip()
     if "</think>" in response:
         response = response.split("</think>")[-1]
@@ -134,7 +169,14 @@ def parse_response(response: str) -> tuple[str, list[str]]:
 
 
 class EndTokenStoppingCriteria(StoppingCriteria):
+    """Stopping criteria that ends generation when a stop token sequence appears."""
+
     def __init__(self, stop_ids: list[int]):
+        """Initialize the stopping criteria.
+
+        Args:
+            stop_ids: The token ID sequence that signals generation should stop.
+        """
         self.stop_ids = stop_ids
 
     def __call__(self, input_ids: Any, scores: Any, **kwargs: Any) -> bool:
@@ -145,7 +187,16 @@ class EndTokenStoppingCriteria(StoppingCriteria):
 
 
 def get_answer(tokenizer: Any, model: Any, chunk: list[Any]) -> str:
-    """Generate the structured answer from the model."""
+    """Generate the structured answer from the LLM.
+
+    Args:
+        tokenizer: The tokenizer used for the chat prompt.
+        model: The language model instance used for generation.
+        chunk: The retrieved chunk list containing question and sources.
+
+    Returns:
+        The formatted answer text with SOURCES block.
+    """
     messages = prompt_gen(chunk[0]["question"], chunk)
     text = tokenizer.apply_chat_template(messages, tokenize=False,
                                          add_generation_prompt=True)
@@ -180,7 +231,15 @@ def get_answer(tokenizer: Any, model: Any, chunk: list[Any]) -> str:
 
 
 def answer_data_set(tokenizer: Any, model: Any) -> None:
-    """Generate the response for the whole dataset."""
+    """Generate answers for the full dataset and save results.
+
+    Args:
+        tokenizer: The tokenizer used for generation.
+        model: The language model instance used for generation.
+
+    Returns:
+        None.
+    """
     data_set = get_data_set()
     list_MinimalAnswer: list[MinimalAnswer] = []
     i = 0
