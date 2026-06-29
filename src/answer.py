@@ -25,7 +25,8 @@ def get_data_set() -> tuple[list[MinimalSearchResults],
     """Load student search results for code and docs.
 
     Returns:
-        A tuple where the first element is a list of code search results and the
+        A tuple where the first element is a list of code search
+        results and the
         second element is a list of doc search results.
     """
     with open(OUTPUT_CODE_SET, "r") as data:
@@ -127,8 +128,8 @@ def parse_response(response: str) -> tuple[str, list[str]]:
         A tuple containing the answer text and a list of source file paths.
     """
     response = response.strip()
-    if "</think>" in response:
-        response = response.split("</think>")[-1]
+    if "<tool_call>" in response:
+        response = response.split("<tool_call>")[-1]
     if "<<END>>" in response:
         response = response.split("<<END>>")[0]
     lines = [ln for ln in response.splitlines() if ln.strip()
@@ -169,13 +170,15 @@ def parse_response(response: str) -> tuple[str, list[str]]:
 
 
 class EndTokenStoppingCriteria(StoppingCriteria):
-    """Stopping criteria that ends generation when a stop token sequence appears."""
+    """Stopping criteria that ends generation when a stop token
+    sequence appears."""
 
     def __init__(self, stop_ids: list[int]):
         """Initialize the stopping criteria.
 
         Args:
-            stop_ids: The token ID sequence that signals generation should stop.
+            stop_ids: The token ID sequence that signals generation
+            should stop.
         """
         self.stop_ids = stop_ids
 
@@ -259,7 +262,7 @@ def answer_data_set(tokenizer: Any, model: Any) -> None:
             list_MinimalAnswer.append(
                 MinimalAnswer(
                     question_id=data_model.question_id,
-                    question=data_model.question,
+                    question_str=data_model.question,
                     retrieved_sources=data_model.retrieved_sources,
                     answer=response,
                 )

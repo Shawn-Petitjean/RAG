@@ -4,16 +4,6 @@ EXE = $(SRC)
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
 
-UV_CACHE = .uv_cache
-HF_CACHE = .hf_cache
-
-UV_CACHE_DIR = $(CURDIR)/$(UV_CACHE)
-HF_CACHE_DIR = $(CURDIR)/$(HF_CACHE)
-
-UV_SETUP = UV_CACHE_DIR="$(UV_CACHE_DIR)" UV_LINK_MODE=copy
-HF_SETUP = HF_HOME="$(HF_CACHE_DIR)" HUGGINGFACE_HUB_CACHE="$(HF_CACHE_DIR)/hub" TRANSFORMERS_CACHE="$(HF_CACHE_DIR)/transformers"
-
-
 TRASH = $(SRC)/__pycache__ llm_sdk/__pycache__ __pycache__ $(VENV) .mypy_cache data/output .uv_cache
 
 MYPY_FLAGS = --strict --no-error-summary
@@ -31,32 +21,24 @@ install:
 	@echo "$(BOLD)Initializing project environment:$(RESET)"
 
 	@echo "$(YELLOW)Creating virtual environment...$(RESET)"
-	@$(UV_SETUP) $(HF_SETUP) \
-		uv venv $(VENV) --clear > /dev/null 2>&1
+	uv venv $(VENV) --clear > /dev/null 2>&1
 	@echo "$(GREEN)Virtual environment setup complete$(RESET)"
 
-	@bash -c '\
-		$(UV_SETUP) $(HF_SETUP) UV_PROJECT_ENVIRONMENT="$(VENV)" \
-		uv sync > /dev/null 2>&1 & pid=$$!; \
-		spin="-\|/"; i=0; \
-		while kill -0 $$pid 2>/dev/null; do \
-			printf "\r$(YELLOW)[%s] Installing dependencies...$(RESET)" "$${spin:$$((i % 4)):1}"; \
-			i=$$((i + 1)); \
-			sleep 0.1; \
-		done; \
-		wait $$pid'
+	UV_PROJECT_ENVIRONMENT="$(VENV)" \
+	uv sync > /dev/null 2>&1 & pid=$$!; \
+
 
 	@echo "\n$(GREEN)All dependencies successfully installed$(RESET)"
 	@echo "\n$(SUCCESS)Project can now be run safely!$(RESET)"
 
 run:
-	@$(HF_SETUP) uv run python -m $(EXE) prerun 1600 $(FLAGS)
+	uv run python -m $(EXE) run_all 1000 $(FLAGS)
 
 lint:
 	@echo "$(BOLD)Verifying project source code:$(RESET)"
 
 	@echo "$(YELLOW)Running flake8...$(RESET)"
-	@$(PYTHON) -m flake8
+	@$(PYTHON) -m flake8 src
 	@echo "$(GREEN)No norm errors found$(RESET)"
 
 	@echo "\n$(YELLOW)Running mypy...$(RESET)"
@@ -66,7 +48,11 @@ lint:
 	@echo "\n$(SUCCESS)Success: no errors found in source code!$(RESET)"
 
 debug:
-	@$(HF_SETUP) $(PYTHON) -m pdb -m $(EXE) $(FLAGS)
+	uv run python -m src run_all 1000 
+	chunking files...                                                                                                                              0%
+	an error a occured NameError
+	name 'chunk_size' is not defined
+	$(PYTHON) -m pdb -m $(EXE) $(FLAGS)
 
 clean:
 	@echo "$(YELLOW)Initiating cleanup operation...$(RESET)"

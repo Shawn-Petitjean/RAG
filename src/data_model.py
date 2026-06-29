@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 
@@ -24,9 +24,19 @@ class RagDataset(BaseModel):
 
 
 class MinimalSearchResults(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     question_id: str
-    question: str
+    question_str: str = Field(validation_alias="question")
     retrieved_sources: List[MinimalSource]
+
+    @property
+    def question(self) -> str:
+        return self.question_str
+
+    @question.setter
+    def question(self, value: str) -> None:
+        self.question_str = value
 
 
 class MinimalAnswer(MinimalSearchResults):

@@ -1,20 +1,17 @@
 from .config import (
-                     UNANSWER_DOCS,
-                     UNANSWER_CODE,
-                     OUTPUT_DOC_SET,
-                     OUTPUT_CODE_SET,
-                     OUTPUT_CHUNK,
-                     ENGLISH_STOPWORDS,
-                     PYTHON_KEYWORDS
-                    )
+    OUTPUT_CHUNK,
+    ENGLISH_STOPWORDS,
+    PYTHON_KEYWORDS,
+    STOPWORDS,
+)
 from .data_model import (
-                         UnansweredQuestion,
-                         MinimalSearchResults,
-                         StudentSearchResults
-                        )
+    UnansweredQuestion,
+    MinimalSearchResults,
+    StudentSearchResults,
+)
 from .utils import get_chunk, preprocess_append
 import json
-import bm25s  # type: ignore[import-untyped]
+import bm25s
 from typing import Any
 from tqdm import tqdm
 
@@ -40,78 +37,72 @@ def save_search(res: list[int], chunk_type: str = "all") -> list[Any]:
     return res_chunk
 
 
-def gather_data_set() -> tuple[list[UnansweredQuestion],
-                               list[UnansweredQuestion]]:
-    """Open the files and format them
-
-    Returns:
-        list of the data_class with the good format.
-    """
-    with open(UNANSWER_DOCS, 'r') as data:
-        docs = json.load(data)
-    with open(UNANSWER_CODE, 'r') as data:
-        codes = json.load(data)
-    unanswer_code = [UnansweredQuestion.model_validate(code)
-                     for code in codes["rag_questions"]]
-    unanswer_doc = [UnansweredQuestion.model_validate(doc)
-                    for doc in docs["rag_questions"]]
-    return unanswer_code, unanswer_doc
-
-
-def process_data_set(data_set: tuple[list[UnansweredQuestion],
-                     list[UnansweredQuestion]],
-                     retriever_md: Any, retriever_py: Any, k: int) -> None:
-    """Take the question and chunk, and give them to
-       bm25 for finding the good chunk.
+def gather_data_set(data_path: str) -> list[UnansweredQuestion]:
+    """Open the file and format the unanswered questions.
 
     Args:
-        data_set: tuple that contain all of chunk and question.
+        data_path: Path to the dataset JSON.
 
     Returns:
-        Save a json with the StudentSearchResults
-        that contain question and chunk associated.
+        List of validated UnansweredQuestion objects.
     """
-    code_search_res = []
-    doc_search_res = []
-    for code in tqdm(
-                    data_set[0],
-                    desc="Searching for code question with bm25",
+    with open(data_path, 'r') as data:
+        questions = json.load(data)
+    return [UnansweredQuestion.model_validate(question)
+            for question in questions["rag_questions"]]
+
+
+def process_data_set(
+                     data_set: list[UnansweredQuestion],
+                     retriever: Any,
+                     k: int,
+                     output_path: str,
+                     chunk_type: str = "all"
+                     ) -> None:
+    """Run retrieval on a dataset and save student search results.
+
+    Args:
+        data_set: List of unanswered questions.
+        retriever: BM25 retriever instance.
+        k: Number of top chunks to retrieve.
+        output_path: Path where results are saved.
+        chunk_type: One of "all", "doc", or "code".
+    """
+    if chunk_type == "code":
+        stopwords = PYTHON_KEYWORDS
+        desc = "Searching for code questions with bm25"
+    elif chunk_type == "doc":
+        stopwords = ENGLISH_STOPWORDS
+        desc = "Searching for doc questions with bm25"
+    else:
+        stopwords = STOPWORDS
+        desc = "Searching for questions with bm25"
+
+    search_res = []
+    for data in tqdm(
+                    data_set,
+                    desc=desc,
                     bar_format="{desc} {bar} {percentage:.0f}%"
                     ):
         query_token = bm25s.tokenize(
-            [preprocess_append(code.question)], stopwords=PYTHON_KEYWORDS
+            [preprocess_append(data.question)], stopwords=stopwords
         )
-        results, scores = retriever_py.retrieve(query_token, k=k)
-        res_chunk = save_search(results[0], chunk_type="code")
-        code_search_res.append(MinimalSearchResults(
-                question_id=code.question_id,
-                question=code.question,
+        results, scores = retriever.retrieve(query_token, k=k)
+        if results is None or len(results) == 0:
+            res_chunk = []
+        else:
+            res_chunk = save_search(results[0], chunk_type=chunk_type)
+        search_res.append(
+            MinimalSearchResults(
+                question_id=data.question_id,
+                question_str=data.question,
                 retrieved_sources=res_chunk,
-            ))
-    code_stud_search_res = StudentSearchResults(
-            search_results=code_search_res,
+            )
+        )
+
+    data_stud_search_res = StudentSearchResults(
+            search_results=search_res,
             k=k
         )
-    for doc in tqdm(
-                    data_set[1],
-                    desc="Searching for doc question with bm25",
-                    bar_format="{desc} {bar} {percentage:.0f}%"
-                    ):
-        query_token = bm25s.tokenize(
-            [preprocess_append(doc.question)], stopwords=ENGLISH_STOPWORDS
-        )
-        results, scores = retriever_md.retrieve(query_token, k=k)
-        res_chunk = save_search(results[0], chunk_type="doc")
-        doc_search_res.append(MinimalSearchResults(
-                question_id=doc.question_id,
-                question=doc.question,
-                retrieved_sources=res_chunk,
-            ))
-    doc_stud_search_res = StudentSearchResults(
-        search_results=doc_search_res,
-        k=k
-        )
-    with open(OUTPUT_CODE_SET, 'w') as f:
-        f.write(code_stud_search_res.model_dump_json(indent=4))
-    with open(OUTPUT_DOC_SET, 'w') as f:
-        f.write(doc_stud_search_res.model_dump_json(indent=4))
+    with open(output_path, 'w') as f:
+        f.write(data_stud_search_res.model_dump_json(indent=4))
