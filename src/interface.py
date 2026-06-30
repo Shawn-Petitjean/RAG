@@ -93,7 +93,10 @@ class Cli(object):
             [preprocess_append(query)], stopwords=STOPWORDS
         )
         results, scores = retriever.retrieve(query_token, k=k)
-        if not results:
+        # Avoid ambiguous truth-value checks for lists/NumPy arrays
+        if results is None or (
+            hasattr(results, "__len__") and len(results) == 0
+        ) or (hasattr(results, "size") and getattr(results, "size") == 0):
             print("No results found for the query.")
             return
         question = [{"question": query}]
