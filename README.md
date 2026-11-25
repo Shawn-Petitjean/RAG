@@ -1,6 +1,4 @@
-*This project has been created as part of the 42 curriculum by shapetit.*
-
-# RAG Against the Machine
+# RAG
 
 ## Description
 
