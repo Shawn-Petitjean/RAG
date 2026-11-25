@@ -11,7 +11,7 @@ from .data_model import (
 )
 from .utils import get_chunk, preprocess_append
 import json
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 from typing import Any
 from tqdm import tqdm
 

@@ -16,15 +16,11 @@ from .search import gather_data_set, process_data_set, save_search
 from .bm25 import bm_tokeniser
 from .config import OUTPUT_ANSWER, MODEL_NAME
 from .answer import get_answer, answer_data_set
-from .evaluate import (
-    find_recall_metric,
-    list_valid_questions,
-    evaluate_student_search_results,
-)
+from .evaluate import find_recall_metric
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Any
 import json
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 import os
 from tqdm import tqdm
 
@@ -132,9 +128,6 @@ class Cli(object):
             print("Please use the command index before")
             return
 
-        if not os.path.exists(save_directory):
-            os.makedirs(save_directory, exist_ok=True)
-
         dataset = gather_data_set(dataset_path)
         dataset_name = os.path.basename(dataset_path).lower()
         if "doc" in dataset_name:
@@ -178,9 +171,9 @@ class Cli(object):
         tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
         model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
         result = get_answer(tokenizer, model, chunk)
-        output = {"answer": result}
         with open(OUTPUT_ANSWER, "w") as f:
-            f.write(json.dumps(output, ensure_ascii=False, indent=4))
+            f.write(json.dumps(result, ensure_ascii=False, indent=4))
+        print(result)
 
     def answer_data_set(self) -> None:
         """Take the query in data_set and chunk find in search and answer
@@ -234,37 +227,6 @@ class Cli(object):
             )
         for i, result in enumerate(code_results):
             print(f"k@{order[i]} ; {int(result * 100)}% ({result})")
-
-    def list_valid_questions(
-        self,
-        student_answer_path: str,
-        dataset_path: str,
-        k: int = 5,
-    ) -> None:
-        """List valid questions based on retrieved sources."""
-        questions = list_valid_questions(student_answer_path, dataset_path, k)
-        if not questions:
-            print("No valid questions found.")
-            return
-        for question in questions:
-            print(question)
-
-    def evaluate_student_search_results(
-        self,
-        student_results_path: str,
-        dataset_path: str,
-        k: int = 5,
-        max_context_length: int = 2000,
-        threshold: float = 0.0,
-    ) -> None:
-        """Evaluate student search results using recall metrics."""
-        evaluate_student_search_results(
-            student_results_path,
-            dataset_path,
-            k,
-            max_context_length,
-            threshold,
-        )
 
     def run_all(self, chunk_size: int) -> None:
         """Run indexing, retrieval on public datasets, and evaluation."""

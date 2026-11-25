@@ -1,4 +1,4 @@
-import bm25s
+import bm25s  # type: ignore[import-untyped]
 from typing import Any
 from .data_model import MinimalSource
 from .utils import extract, preprocess_with_path
