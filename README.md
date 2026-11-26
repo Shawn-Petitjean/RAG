@@ -22,6 +22,39 @@ uv sync
 make install
 ```
 
+### Expected File Paths & Configuration
+
+By default, this RAG expects specific directory and file names at fixed locations:
+
+- **Knowledge base (repository to index):** `data/raw/vllm-0.10.1` (only `.py` and `.md` files inside this directory are indexed)
+- **Datasets (used by `run_all` and `evaluate`):**
+  - `data/public/UnansweredQuestions/dataset_docs_public.json`
+  - `data/public/UnansweredQuestions/dataset_code_public.json`
+  - `data/public/AnsweredQuestions/dataset_docs_public.json`
+  - `data/public/AnsweredQuestions/dataset_code_public.json`
+
+#### How to change them
+
+1. Edit the path constants in `src/config.py`:
+
+```python
+# Path to the folder containing the files to index
+VLLM_FILE = "data/raw/your-folder-name"
+
+# Paths to the question datasets
+ANSWER_CODE = "path/to/answered_code_dataset.json"
+ANSWER_DOCS = "path/to/answered_docs_dataset.json"
+UNANSWER_DOCS = "path/to/unanswered_docs_dataset.json"
+UNANSWER_CODE = "path/to/unanswered_code_dataset.json"
+```
+
+2. If you also rename or move the evaluation datasets, update the hardcoded paths inside `Cli.evaluate()` in `src/interface.py` (`dataset_docs_public.json` and `dataset_code_public.json`).
+3. After changing `VLLM_FILE`, re-run the indexing step so the chunks and BM25 indexes are rebuilt for the new files:
+
+```bash
+uv run python -m src index --chunk_size 2000
+```
+
 ### Execution
 
 #### 1. Index the vLLM repository
