@@ -160,7 +160,7 @@ The ranking formula is controlled by two parameters tuned for this codebase:
 
 Stopwords are filtered during tokenization to reduce noise from common words. The index is saved to disk after the first `index` call and reloaded on subsequent commands, avoiding re-indexing on every run.
 
-Retrieved chunks are returned with their `file_path`, `first_character_index`, and `last_character_index` — the exact format required by the evaluation system.
+Retrieved chunks are returned with their `file_path`, `first_character_index`, and `last_character_index` — the format used by the evaluation step.
 
 ## Performance Analysis
 
@@ -171,9 +171,9 @@ Evaluation is performed using **Recall@k** — the proportion of ground-truth so
 | Docs    | —        | —        | **0.80** | —         |
 | Code    | —        | —        | **0.72** | —         |
 
-**Required thresholds:** Docs ≥ 0.80 ✅ — Code ≥ 0.50 ✅
+**Target thresholds:** Docs ≥ 0.80 ✅ — Code ≥ 0.50 ✅
 
-The code dataset scores above the required threshold thanks to AST-based chunking that preserves function and class boundaries, avoiding cuts in the middle of logical units.
+The code dataset scores well above its target thanks to AST-based chunking that preserves function and class boundaries, avoiding cuts in the middle of logical units.
 
 ## Design Decisions
 
@@ -244,4 +244,4 @@ Claude (Anthropic) was used as a learning and debugging assistant throughout the
 - Helping identify bugs (off-by-one in character indices, corpus not saved with BM25 index, `<think>` blocks in Qwen3 output)
 - optimisation of bm25 with preprocess
 
-All code was written and understood by the student — AI was used as a reference tool, not a code generator.
+All code was written and understood by the author — AI was used as a reference tool, not a code generator.
